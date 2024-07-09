@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: db-petqa.chu202akwjzf.ap-northeast-2.rds.amazonaws.com:3306/pet_qa?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: ehdfprl77
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      validation-timeout: 5000
+      connection-test-query: SELECT 1
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+
