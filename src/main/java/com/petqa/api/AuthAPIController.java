@@ -89,7 +89,7 @@ public class AuthAPIController {
                     .username(username)
                     .socialId(socialId)
                     .refresh(refresh)
-                    .expiration(date.toString())
+                    .expiration(date)
                     .build();
             refreshRepository.save(refreshToken);
             System.out.println("Refresh token saved successfully: " + refresh);

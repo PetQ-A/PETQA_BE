@@ -1,9 +1,9 @@
 package com.petqa.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Date;
 
 @Entity
 @Getter
@@ -19,5 +19,7 @@ public class Refresh {
     private String username;
     private String socialId;
     private String refresh;
-    private String expiration;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date expiration;
 }
