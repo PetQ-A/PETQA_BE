@@ -1,5 +1,7 @@
 package com.petqa.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petqa.apiPayload.apiPayload.ApiResponse;
 import com.petqa.repository.RefreshRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -9,6 +11,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
@@ -17,6 +20,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public CustomLogoutFilter(JWTUtil jwtUtil, RefreshRepository refreshRepository) {
 
@@ -32,76 +36,72 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
     private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        //path and method verify
         String requestUri = request.getRequestURI();
-        if (!requestUri.matches("^\\/logout$")) {
-
-            filterChain.doFilter(request, response);
-            return;
-        }
-        String requestMethod = request.getMethod();
-        if (!requestMethod.equals("POST")) {
-
+        if (!requestUri.matches("^\\/logout$") || !request.getMethod().equals("POST")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        //get refresh token
         String refresh = null;
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-
-            if (cookie.getName().equals("refresh")) {
-
-                refresh = cookie.getValue();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("refresh")) {
+                    refresh = cookie.getValue();
+                    break;
+                }
             }
         }
 
-        //refresh null check
         if (refresh == null) {
-
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Refresh token not found");
             return;
         }
 
-        //expired check
         try {
             jwtUtil.isExpired(refresh);
         } catch (ExpiredJwtException e) {
-
-            //response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Expired refresh token");
             return;
         }
 
-        // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
         String category = jwtUtil.getCategory(refresh);
         if (!category.equals("refresh")) {
-
-            //response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid token category");
             return;
         }
 
-        //DB에 저장되어 있는지 확인
         Boolean isExist = refreshRepository.existsByRefresh(refresh);
         if (!isExist) {
-
-            //response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Refresh token not found in database");
             return;
         }
 
-        //로그아웃 진행
-        //Refresh 토큰 DB에서 제거
         refreshRepository.deleteByRefresh(refresh);
 
-        //Refresh 토큰 Cookie 값 0
         Cookie cookie = new Cookie("refresh", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
-
         response.addCookie(cookie);
+
+        sendSuccessResponse(response);
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, int statusCode, String message) throws IOException {
+        response.setStatus(statusCode);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+
+        ApiResponse<String> apiResponse = ApiResponse.onFailure(String.valueOf(statusCode), message, null);
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+    }
+
+    private void sendSuccessResponse(HttpServletResponse response) throws IOException {
         response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+
+        ApiResponse<String> apiResponse = ApiResponse.onSuccess("Logged out successfully");
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
     }
 }
