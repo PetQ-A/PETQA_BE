@@ -1,7 +1,9 @@
 spring:
+  jwt:
+    secret: sldfkjsldkfjskdfjsldkfjslkdfjsldkfjslkjfsklfjdkljflskdksjdglasidgasdgiwoeiwoi
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: db-petqa.chu202akwjzf.ap-northeast-2.rds.amazonaws.com:3306/pet_qa?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://db-petqa.chu202akwjzf.ap-northeast-2.rds.amazonaws.com:3306/petqa?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
     password: ehdfprl77
     hikari:
@@ -16,12 +18,15 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        default_batch_fetch_size: 100
+        default_batch_fetch_size: 1000
+
       dialect: org.hibernate.dialect.MySQL8InnoDBDialect
 
   servlet:
