@@ -91,9 +91,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
 
         //응답 설정
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
         response.setHeader("access", access);
         response.addCookie(Util.createCookie("refresh", refresh));
         response.setStatus(HttpStatus.OK.value());
+        try {
+            objectMapper.writeValue(response.getWriter(), ApiResponse.onSuccess("Login successful"));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     //로그인 실패시 실행하는 메소드
