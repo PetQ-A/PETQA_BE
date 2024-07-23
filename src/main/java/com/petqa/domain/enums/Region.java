@@ -1,10 +1,12 @@
 package com.petqa.domain.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
 @AllArgsConstructor
 public enum Region {
-
+    ALL_REGION("전체"),
     SEOUL("서울시"),
     BUSAN("부산시"),
     DAEGU("대구시"),
@@ -24,4 +26,13 @@ public enum Region {
     JEJU("제주도");
 
     private final String name;
+
+    public static Region fromName(String name) {
+        for (Region region : Region.values()) {
+            if (region.getName().equals(name)) {
+                return region;
+            }
+        }
+        return Region.ALL_REGION;
+    }
 }

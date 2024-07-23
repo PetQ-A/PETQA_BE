@@ -32,7 +32,7 @@ public class Post extends MutableBaseEntity {
     @Column(nullable = false)
     private Category category;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 }

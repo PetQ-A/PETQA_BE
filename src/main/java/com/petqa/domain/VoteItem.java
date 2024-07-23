@@ -18,7 +18,7 @@ public class VoteItem {
 
     private Long number;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vote_id")
     private Vote vote;
 }
