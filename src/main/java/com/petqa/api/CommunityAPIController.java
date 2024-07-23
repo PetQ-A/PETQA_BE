@@ -2,13 +2,11 @@ package com.petqa.api;
 
 import com.petqa.apiPayload.apiPayload.ApiResponse;
 import com.petqa.dto.community.CommunityResponseDTO;
+import com.petqa.service.community.CommunityCommandService;
 import com.petqa.service.community.CommunityQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,6 +16,8 @@ import java.util.List;
 public class CommunityAPIController {
 
     final private CommunityQueryService communityQueryService;
+    final private CommunityCommandService communityCommandService;
+
     @GetMapping("/")
     public ResponseEntity<ApiResponse<List<CommunityResponseDTO.PostListResponseDTO>>> postList(@RequestParam(defaultValue = "전체") String category,
                                                                                                 @RequestParam(defaultValue = "전체") String region,
@@ -29,5 +29,11 @@ public class CommunityAPIController {
 
 
         return ResponseEntity.ok(ApiResponse.onSuccess(communityQueryService.getPostList(category, region, sort, keyword, size, lastPost, lastView)));
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<ApiResponse<CommunityResponseDTO.PostResponseDTO>> postRead(@PathVariable Long postId) {
+        communityCommandService.upView(postId);
+        return ResponseEntity.ok(ApiResponse.onSuccess(communityQueryService.getPost(postId)));
     }
 }

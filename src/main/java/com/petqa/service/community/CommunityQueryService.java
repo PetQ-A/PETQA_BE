@@ -2,11 +2,11 @@ package com.petqa.service.community;
 
 import com.petqa.domain.Post;
 import com.petqa.domain.PostImage;
+import com.petqa.domain.Vote;
 import com.petqa.domain.enums.Category;
 import com.petqa.domain.enums.Region;
 import com.petqa.dto.community.CommunityResponseDTO;
-import com.petqa.repository.PostImageRepository;
-import com.petqa.repository.PostRepository;
+import com.petqa.repository.community.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +25,9 @@ public class CommunityQueryService {
 
     final private PostRepository postRepository;
     final private PostImageRepository postImageRepository;
+    final private CommentRepository commentRepository;
+    final private VoteRepository voteRepository;
+    final private VoteItemRepository voteItemRepository;
 
     /*
      * 게시글 리스트 조회
@@ -32,6 +35,8 @@ public class CommunityQueryService {
     public List<CommunityResponseDTO.PostListResponseDTO> getPostList(String category, String region, String sort,
                                                                       String keyword, Integer size, Long lastPost,
                                                                       Long lastView) {
+        log.info("카테고리: {}, 지역: {}, 정렬: {}, 키워드: {}, 크기: {}, lastPost: {}, lastView: {}",
+                category, region, sort, keyword, size, lastPost, lastView);
 
         Category resultCategory = category.equals("전체") ? null:Category.fromName(category);
         Region resultRegion = region.equals("전체") ? null:Region.fromName(region);
@@ -39,7 +44,6 @@ public class CommunityQueryService {
         PageRequest pageRequest = PageRequest.of(0, size != null ? size : 20);
 
         List<Post> postList;
-
         switch (sort) {
             case "최신순":
                 postList = postRepository.findPostsLatest(resultCategory, resultRegion, keyword, lastPost, pageRequest);
@@ -51,8 +55,6 @@ public class CommunityQueryService {
                 postList = postRepository.findPostsLatest(resultCategory, resultRegion, keyword, lastPost, pageRequest);
                 break;
         }
-
-        log.info("게시물 리스트 dto 변환 시작");
 
         return postList.stream()
                 .map(post -> CommunityResponseDTO.PostListResponseDTO.builder()
@@ -74,9 +76,53 @@ public class CommunityQueryService {
 
 
     /*
-     * 상대시간 구하는 메서드
+     * 게시글 조회
+     */
+    public CommunityResponseDTO.PostResponseDTO getPost(Long postId) {
+        log.info("게시글 id: {} 조회", postId);
+
+        Post post = postRepository.findById(postId).orElseThrow();
+
+        Vote vote = voteRepository.findByPost(post).orElse(null);
+
+        return CommunityResponseDTO.PostResponseDTO.builder()
+                .title(post.getTitle())
+                .content(post.getContent())
+                .image(postImageRepository.findByPost(post).stream()
+                        .map(PostImage::getImage)
+                        .toList())
+                .relativeTime(getRelativeTime(post.getCreatedAt()))
+                .view(post.getView())
+                .comment(commentRepository.countByPost(post))
+                .pet(CommunityResponseDTO.PostResponseDTO.Pet.builder()
+                        .name(post.getUser().getPet().getName())
+                        .species(post.getUser().getPet().getSpecies())
+                        .weight(post.getUser().getPet().getWeight())
+                        .build())
+                .user(CommunityResponseDTO.PostResponseDTO.User.builder()
+                        .userId(post.getUser().getId())
+                        .nickname(post.getUser().getUsername())
+                        .build())
+                .vote(vote != null ?
+                        CommunityResponseDTO.PostResponseDTO.Vote.builder()
+                                .multi(vote.getMulti())
+                                .item(voteItemRepository.findByVote(vote).stream()
+                                        .map(voteItem -> CommunityResponseDTO.PostResponseDTO.Vote.Item.builder()
+                                                .voteItemId(voteItem.getId())
+                                                .content(voteItem.getContent())
+                                                .build())
+                                        .toList())
+                                .build()
+                        : null)
+                .build();
+    }
+
+    /*
+     * 상대 시간 구하는 메서드
      */
     public static String getRelativeTime(LocalDateTime createdAt) {
+        log.info("상대 시간 계산");
+
         // 현재 시간
         LocalDateTime now = LocalDateTime.now();
 

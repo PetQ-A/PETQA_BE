@@ -28,6 +28,10 @@ public class Comment extends MutableBaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "parent")
     private List<Comment> children = new ArrayList<>();
 }

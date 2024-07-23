@@ -35,4 +35,8 @@ public class Post extends MutableBaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    public void upView() {
+        this.view++;
+    }
 }

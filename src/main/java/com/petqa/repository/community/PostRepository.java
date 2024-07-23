@@ -1,10 +1,11 @@
-package com.petqa.repository;
+package com.petqa.repository.community;
 
 import com.petqa.domain.Post;
 import com.petqa.domain.enums.Category;
 import com.petqa.domain.enums.Region;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -35,4 +36,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                                @Param("keyword") String keyword,
                                @Param("lastView") Long lastView,
                                Pageable pageable);
+
+    @Modifying
+    @Query("UPDATE Post p SET p.view = p.view + 1 WHERE p.id = :postId")
+    void incrementViewCount(Long postId);
 }
