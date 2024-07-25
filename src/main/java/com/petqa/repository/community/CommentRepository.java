@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     Long countByPost(Post post);
@@ -20,5 +21,16 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             + "ORDER BY c.id DESC")
     List<Comment> findCommentsLatest(@Param("post") Post post,
                                      @Param("lastComment") Long lastComment,
+                                     Pageable pageable);
+
+    Optional<Comment> findByIdAndPostAndParentIsNull(Long commentId, Post post);
+
+
+    @Query("SELECT c, ct FROM Comment c JOIN CommentTag ct ON ct.comment = c WHERE "
+            + "(c.parent = :comment) AND "
+            + "(:lastReply IS NULL OR c.id > :lastReply)"
+            + "ORDER BY c.id ASC")
+    List<Object[]> findRepliesLatest(@Param("comment") Comment comment,
+                                     @Param("lastReply") Long lastReply,
                                      Pageable pageable);
 }

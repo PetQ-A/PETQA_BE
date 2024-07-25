@@ -44,4 +44,13 @@ public class CommunityAPIController {
 
         return ResponseEntity.ok(ApiResponse.onSuccess(communityQueryService.getComment(size, lastComment, postId)));
     }
+
+    @GetMapping("/{postId}/comments/{commentId}/replies")
+    public ResponseEntity<ApiResponse<List<CommunityResponseDTO.ReplyResponseDTO>>> replyRead(@RequestParam(required = false) Integer size,
+                                                                                              @RequestParam(required = false) Long lastReply,
+                                                                                              @PathVariable Long postId,
+                                                                                              @PathVariable Long commentId) {
+
+        return ResponseEntity.ok(ApiResponse.onSuccess(communityQueryService.getReply(size, lastReply, postId, commentId)));
+    }
 }

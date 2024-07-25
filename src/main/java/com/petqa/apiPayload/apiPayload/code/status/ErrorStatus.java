@@ -34,7 +34,8 @@ public enum ErrorStatus implements BaseErrorCode {
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "REFRESH4001", "리프레시 토큰이 없습니다."),
 
     // 커뮤니티 관련 에러
-    POST_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3001", "존재하지 않는 게시글 입니다.");
+    POST_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3001", "존재하지 않는 게시글 입니다."),
+    COMMENT_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3001", "존재하지 않는 댓글 입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

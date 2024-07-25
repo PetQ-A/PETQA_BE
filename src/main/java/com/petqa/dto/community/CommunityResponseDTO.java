@@ -113,4 +113,38 @@ public class CommunityResponseDTO {
             private Long userId;
         }
     }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    @RequiredArgsConstructor
+    public static class ReplyResponseDTO {
+        private Long replyId;
+        private User user;
+        private Tag tag;
+        private String content;
+        private String relativeTime;
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor
+        @RequiredArgsConstructor
+        public static class User {
+            private String nickname;
+            private String profile;
+            private Long userId;
+        }
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor
+        @RequiredArgsConstructor
+        public static class Tag {
+            private String nickname;
+            private Long userId;
+        }
+    }
 }

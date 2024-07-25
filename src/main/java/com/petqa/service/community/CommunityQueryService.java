@@ -2,9 +2,7 @@ package com.petqa.service.community;
 
 import com.petqa.apiPayload.apiPayload.code.status.ErrorStatus;
 import com.petqa.apiPayload.apiPayload.exception.handler.CommunityHandler;
-import com.petqa.domain.Post;
-import com.petqa.domain.PostImage;
-import com.petqa.domain.Vote;
+import com.petqa.domain.*;
 import com.petqa.domain.enums.Category;
 import com.petqa.domain.enums.Region;
 import com.petqa.dto.community.CommunityResponseDTO;
@@ -119,6 +117,9 @@ public class CommunityQueryService {
                 .build();
     }
 
+    /*
+     * 댓글 조회
+     */
     public List<CommunityResponseDTO.CommentResponseDTO> getComment(Integer size, Long lastComment, Long postId) {
 
         log.info("postId: {}, size: {}, lastComment: {} 댓글 조회",
@@ -141,10 +142,53 @@ public class CommunityQueryService {
                 .toList();
     }
 
+
+    /*
+     * 답글 조회
+     */
+    public List<CommunityResponseDTO.ReplyResponseDTO> getReply(Integer size, Long lastReply, Long postId, Long commentId) {
+
+        log.info("postId: {}, commentId: {}, size: {}, lastReply: {} 답글 조회",
+                postId, commentId, size, lastReply);
+
+        Post post = postRepository.findById(postId).orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));
+
+        Comment comment = commentRepository.findByIdAndPostAndParentIsNull(commentId, post)
+                .orElseThrow(() -> new CommunityHandler(ErrorStatus.COMMENT_NOT_EXIST));
+
+        PageRequest pageRequest = PageRequest.of(0, size != null ? size : 10);
+
+        log.info("답글 목록 : {}", commentRepository.findRepliesLatest(comment, lastReply, pageRequest));
+
+
+        return commentRepository.findRepliesLatest(comment, lastReply, pageRequest).stream()
+                .map(objects -> {
+
+                    Comment reply = (Comment) objects[0];
+                    CommentTag commentTag = (CommentTag) objects[1];
+
+                    return CommunityResponseDTO.ReplyResponseDTO.builder()
+                            .replyId(reply.getId())
+                            .user(CommunityResponseDTO.ReplyResponseDTO.User.builder()
+                                    .userId(reply.getUser().getId())
+                                    .nickname(reply.getUser().getUsername())
+                                    .build())
+                            .tag(CommunityResponseDTO.ReplyResponseDTO.Tag.builder()
+                                    .nickname(commentTag.getUser().getUsername())
+                                    .userId(commentTag.getUser().getId())
+                                    .build())
+                            .content(reply.getContent())
+                            .relativeTime(getRelativeTime(reply.getCreatedAt()))
+                            .build();
+                })
+                .toList();
+    }
+
+
     /*
      * 상대 시간 구하는 메서드
      */
-    public static String getRelativeTime(LocalDateTime createdAt) {
+    public String getRelativeTime(LocalDateTime createdAt) {
         log.info("상대 시간 계산");
 
         // 현재 시간
