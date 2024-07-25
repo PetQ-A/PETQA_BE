@@ -31,8 +31,10 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_NOT_PHONE(HttpStatus.BAD_REQUEST, "USER4011", "전화번호가 없습니다."),
 
     // Refresh Token 관련 에러
-    REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "REFRESH4001", "리프레시 토큰이 없습니다.");
+    REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "REFRESH4001", "리프레시 토큰이 없습니다."),
 
+    // 커뮤니티 관련 에러
+    POST_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3001", "존재하지 않는 게시글 입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

@@ -1,5 +1,7 @@
 package com.petqa.service.community;
 
+import com.petqa.apiPayload.apiPayload.code.status.ErrorStatus;
+import com.petqa.apiPayload.apiPayload.exception.handler.CommunityHandler;
 import com.petqa.domain.Post;
 import com.petqa.domain.PostImage;
 import com.petqa.domain.Vote;
@@ -35,11 +37,11 @@ public class CommunityQueryService {
     public List<CommunityResponseDTO.PostListResponseDTO> getPostList(String category, String region, String sort,
                                                                       String keyword, Integer size, Long lastPost,
                                                                       Long lastView) {
-        log.info("카테고리: {}, 지역: {}, 정렬: {}, 키워드: {}, 크기: {}, lastPost: {}, lastView: {}",
+        log.info("카테고리: {}, 지역: {}, 정렬: {}, 키워드: {}, 크기: {}, lastPost: {}, lastView: {} 게시글 목록 조회",
                 category, region, sort, keyword, size, lastPost, lastView);
 
-        Category resultCategory = category.equals("전체") ? null:Category.fromName(category);
-        Region resultRegion = region.equals("전체") ? null:Region.fromName(region);
+        Category resultCategory = category.equals("전체") ? null : Category.fromName(category);
+        Region resultRegion = region.equals("전체") ? null : Region.fromName(region);
 
         PageRequest pageRequest = PageRequest.of(0, size != null ? size : 20);
 
@@ -81,7 +83,7 @@ public class CommunityQueryService {
     public CommunityResponseDTO.PostResponseDTO getPost(Long postId) {
         log.info("게시글 id: {} 조회", postId);
 
-        Post post = postRepository.findById(postId).orElseThrow();
+        Post post = postRepository.findById(postId).orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));
 
         Vote vote = voteRepository.findByPost(post).orElse(null);
 
@@ -117,6 +119,28 @@ public class CommunityQueryService {
                 .build();
     }
 
+    public List<CommunityResponseDTO.CommentResponseDTO> getComment(Integer size, Long lastComment, Long postId) {
+
+        log.info("postId: {}, size: {}, lastComment: {} 댓글 조회",
+                postId, size, lastComment);
+
+        Post post = postRepository.findById(postId).orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));
+
+        PageRequest pageRequest = PageRequest.of(0, size != null ? size : 10);
+
+        return commentRepository.findCommentsLatest(post, lastComment, pageRequest).stream()
+                .map(comment -> CommunityResponseDTO.CommentResponseDTO.builder()
+                        .commentId(comment.getId())
+                        .user(CommunityResponseDTO.CommentResponseDTO.User.builder()
+                                .userId(comment.getUser().getId())
+                                .nickname(comment.getUser().getUsername())
+                                .build())
+                        .content(comment.getContent())
+                        .relativeTime(getRelativeTime(comment.getCreatedAt()))
+                        .build())
+                .toList();
+    }
+
     /*
      * 상대 시간 구하는 메서드
      */
@@ -134,7 +158,7 @@ public class CommunityQueryService {
         long minutes = seconds / 60;
         long hours = minutes / 60;
         long days = hours / 24;
-        long weeks = days/7;
+        long weeks = days / 7;
 
         // 상대적인 시간 문자열 생성
         if (weeks > 0) {

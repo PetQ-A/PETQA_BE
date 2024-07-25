@@ -91,4 +91,26 @@ public class CommunityResponseDTO {
         }
     }
 
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    @RequiredArgsConstructor
+    public static class CommentResponseDTO {
+        private Long commentId;
+        private User user;
+        private String content;
+        private String relativeTime;
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor
+        @RequiredArgsConstructor
+        public static class User {
+            private String nickname;
+            private String profile;
+            private Long userId;
+        }
+    }
 }
