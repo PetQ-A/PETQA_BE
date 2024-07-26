@@ -3,56 +3,55 @@ spring:
     secret: skdfjlskdfjlsdkfjsdlkfjsldfkjslkdfjsldfkjslkdfjwoeifjwoeifjoasidvjsoacivmaoisxcvmoismdv
     accessTokenExpiration: 3600000
     refreshTokenExpiration: 86400000
-      
-  datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:tcp://localhost/~/petqna
-    username: sa
-    password:
 
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    #  datasource:
+    #    driver-class-name: org.h2.Driver
+    #    url: jdbc:h2:tcp://localhost/~/petqna
+    #    username: sa
+    #    password:
+    #
+    #  h2:
+    #    console:
+    #      enabled: true
+    #      path: /h2-console
+    #
+    #  jpa:
+    #    database-platform: org.hibernate.dialect.H2Dialect
+    #    hibernate:
+    #      ddl-auto: create
+    #    show-sql: true
+    #    properties:
+    #      hibernate:
+    #        format_sql: true
+    #        default_batch_fetch_size: 1000
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://db-petqa.chu202akwjzf.ap-northeast-2.rds.amazonaws.com:3306/petqa?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: ehdfprl77
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      validation-timeout: 5000
+      connection-test-query: SELECT 1
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 1000
 
-  # MySQL
-  #  datasource:
-  #    driver-class-name: com.mysql.cj.jdbc.Driver
-  #    url: jdbc:mysql://db-petqa.chu202akwjzf.ap-northeast-2.rds.amazonaws.com:3306/petqa?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-  #    username: root
-  #    password: ehdfprl77
-  #    hikari:
-  #      maximum-pool-size: 10
-  #      minimum-idle: 2
-  #      idle-timeout: 600000
-  #      max-lifetime: 1800000
-  #      connection-timeout: 30000
-  #      validation-timeout: 5000
-  #      connection-test-query: SELECT 1
-  #
-  #  jpa:
-  #    open-in-view: false
-  #    hibernate:
-  #      ddl-auto: create-drop
-  #      naming:
-  #        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-  #    show-sql: true
-  #    properties:
-  #      hibernate:
-  #        format_sql: true
-  #        default_batch_fetch_size: 1000
-  #
-  #      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
 
   servlet:
     multipart:
