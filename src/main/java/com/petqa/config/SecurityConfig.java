@@ -1,58 +1,56 @@
 package com.petqa.config;
 
-import com.petqa.repository.RefreshRepository;
-import com.petqa.security.CustomAuthenticationProvider;
-import com.petqa.security.jwt.CustomLogoutFilter;
-import com.petqa.security.jwt.LoginFilter;
-import com.petqa.security.jwt.JWTFilter;
-import com.petqa.security.jwt.JWTUtil;
+import com.petqa.security.jwt.JwtAuthenticationProvider;
+import com.petqa.security.jwt.JwtFilter;
+import com.petqa.security.jwt.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final CustomAuthenticationProvider authenticationProvider;
-    private final JWTUtil jwtUtil;
-    private final RefreshRepository refreshRepository;
+    private final JwtUtil jwtUtil;
+    private final JwtAuthenticationProvider jwtAuthenticationProvider;
 
-    public SecurityConfig(CustomAuthenticationProvider authenticationProvider, JWTUtil jwtUtil, RefreshRepository refreshRepository) {
-        this.authenticationProvider = authenticationProvider;
+    public SecurityConfig(JwtUtil jwtUtil, JwtAuthenticationProvider jwtAuthenticationProvider) {
         this.jwtUtil = jwtUtil;
-        this.refreshRepository = refreshRepository;
+        this.jwtAuthenticationProvider = jwtAuthenticationProvider;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.authenticationProvider(jwtAuthenticationProvider);
+        return authenticationManagerBuilder.build();
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authenticationManager, RefreshRepository refreshRepository) throws Exception {
+    public JwtFilter jwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+        return new JwtFilter(authenticationManager, jwtUtil);
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/", "/join", "/health").permitAll()
-                        .requestMatchers("/reissue").permitAll()
+                .formLogin(formLogin -> formLogin.disable())
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/health").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager, jwtUtil, refreshRepository), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
+                .authenticationProvider(jwtAuthenticationProvider)
+                .addFilterBefore(jwtAuthenticationFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

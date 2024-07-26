@@ -1,4 +1,4 @@
-package com.petqa.service;
+package com.petqa.service.schedular;
 
 import com.petqa.domain.Refresh;
 import com.petqa.repository.RefreshRepository;

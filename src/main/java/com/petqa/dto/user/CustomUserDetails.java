@@ -1,10 +1,9 @@
-package com.petqa.dto.auth;
+package com.petqa.dto.user;
 
 import com.petqa.domain.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails {
@@ -20,18 +19,8 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        Collection<GrantedAuthority> collection = new ArrayList<>();
+        return null;
 
-        collection.add(new GrantedAuthority() {
-
-            @Override
-            public String getAuthority() {
-
-                return null;
-            }
-        });
-
-        return collection;
     }
 
     @Override
@@ -40,14 +29,20 @@ public class CustomUserDetails implements UserDetails {
         return "";
     }
 
+    public String getSocialId() {
+
+        return user.getSocialId();
+    }
+
     @Override
     public String getUsername() {
 
         return user.getUsername();
     }
 
-    public String getSocialId() {
-        return user.getSocialId();
+    public User getUser() {
+
+        return user;
     }
 
     @Override
