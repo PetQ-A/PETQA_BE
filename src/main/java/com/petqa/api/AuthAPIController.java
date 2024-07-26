@@ -1,104 +1,111 @@
 package com.petqa.api;
 
 import com.petqa.apiPayload.apiPayload.ApiResponse;
-import com.petqa.apiPayload.apiPayload.code.status.ErrorStatus;
 import com.petqa.base.Util;
-import com.petqa.domain.Refresh;
-import com.petqa.repository.RefreshRepository;
-import com.petqa.security.jwt.JWTUtil;
-import io.jsonwebtoken.ExpiredJwtException;
+import com.petqa.dto.auth.AuthRequestDTO;
+import com.petqa.dto.auth.AuthResponseDTO;
+import com.petqa.dto.user.UserRequestDTO;
+import com.petqa.service.user.UserCommandService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Date;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
+@RequestMapping("/auth")
 @RequiredArgsConstructor
-@Transactional
 public class AuthAPIController {
 
-    private final JWTUtil jwtUtil;
-    private final RefreshRepository refreshRepository;
+    private final UserCommandService userCommandService;
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthResponseDTO.UserInfoDTO>> login(@RequestBody AuthRequestDTO.SocialLoginDTO loginRequest, HttpServletResponse response) {
+        AuthResponseDTO.LoginResponseDTO loginedUser = userCommandService.login(loginRequest);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("access", loginedUser.getAccessToken());
+
+        Cookie refresh = Util.createCookie("refresh", loginedUser.getRefreshToken());
+        response.addCookie(refresh);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(ApiResponse.onSuccess(loginedUser.getUserInfo()));
+    }
+
+    @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<AuthResponseDTO.UserInfoDTO>> join(
+            @RequestPart("joinRequest") UserRequestDTO.CreateUserDTO joinRequest,
+            @RequestPart(value = "petProfileImage", required = false) MultipartFile petProfileImage,
+            HttpServletResponse response) {
+
+        joinRequest.setPetProfileImage(petProfileImage);
+
+
+        AuthResponseDTO.LoginResponseDTO joinedUser = userCommandService.join(joinRequest);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("access", joinedUser.getAccessToken());
+
+        Cookie refresh = Util.createCookie("refresh", joinedUser.getRefreshToken());
+        response.addCookie(refresh);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(ApiResponse.onSuccess(joinedUser.getUserInfo()));
+    }
+
 
     @PostMapping("/reissue")
     public ResponseEntity<ApiResponse<String>> reissue(HttpServletRequest request, HttpServletResponse response) {
-
-        //get refresh token
         String refresh = null;
+
         Cookie[] cookies = request.getCookies();
+
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals("refresh")) {
                 refresh = cookie.getValue();
             }
         }
 
-        if (refresh == null) {
-            return ResponseEntity.badRequest().body(ApiResponse.onFailure(ErrorStatus.BAD_REQUEST.getCode(), "refresh token null", null));
-        }
+        AuthResponseDTO.ReissueResponseDTO reissued = userCommandService.reissue(refresh);
 
-        //expired check
-        try {
-            jwtUtil.isExpired(refresh);
-        } catch (ExpiredJwtException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.onFailure(ErrorStatus.BAD_REQUEST.getCode(), "refresh token expired", null));
-        }
+        response.setHeader("access", reissued.getAccessToken());
+        response.addCookie(Util.createCookie("refresh", reissued.getRefreshToken()));
 
-        // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
-        String category = jwtUtil.getCategory(refresh);
+        return ResponseEntity.ok(ApiResponse.onSuccess("reissued"));
 
-        if (!category.equals("refresh")) {
-            return ResponseEntity.badRequest().body(ApiResponse.onFailure(ErrorStatus.BAD_REQUEST.getCode(), "invalid refresh token", null));
-        }
-
-        //DB에 저장되어 있는지 확인
-        Boolean isExist = refreshRepository.existsByRefresh(refresh);
-        if (!isExist) {
-
-            //response body
-            return ResponseEntity.badRequest().body(ApiResponse.onFailure(ErrorStatus.BAD_REQUEST.getCode(), "invalid refresh token", null));
-        }
-
-        String username = jwtUtil.getUsername(refresh);
-        String socialId = jwtUtil.getSocialId(refresh);
-
-        //make new JWT
-        String newAccess = jwtUtil.createJwt("access", username, socialId, 600000L);
-        String newRefresh = jwtUtil.createJwt("refresh", username, socialId, 86400000L);
-
-        //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
-        refreshRepository.deleteByRefresh(refresh);
-        addRefreshEntity(username, socialId, newRefresh, 86400000L);
-
-        //response
-        response.setHeader("access", newAccess);
-        response.addCookie(Util.createCookie("refresh", newRefresh));
-
-        return ResponseEntity.ok(ApiResponse.onSuccess("Token reissued successfully"));
     }
 
-    private void addRefreshEntity(String username, String socialId, String refresh, Long expiredMs) {
-        try {
-            Date date = new Date(System.currentTimeMillis() + expiredMs);
-            Refresh refreshToken = Refresh.builder()
-                    .username(username)
-                    .socialId(socialId)
-                    .refresh(refresh)
-                    .expiration(date)
-                    .build();
-            refreshRepository.save(refreshToken);
-            System.out.println("Refresh token saved successfully: " + refresh);
-        } catch (Exception e) {
-            System.err.println("Error saving refresh token: " + e.getMessage());
-            e.printStackTrace();
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = null;
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("refresh")) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
         }
+
+        userCommandService.logout(refreshToken);
+
+        // 클라이언트 쪽 쿠키 삭제
+        Cookie refreshCookie = new Cookie("refresh", null);
+        refreshCookie.setMaxAge(0);
+        refreshCookie.setPath("/");
+        response.addCookie(refreshCookie);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess("로그아웃 성공"));
     }
-
-
-
 }
+
+

@@ -1,8 +1,8 @@
 package com.petqa.domain;
 
 import com.petqa.domain.common.MutableBaseEntity;
-import com.petqa.domain.enums.PetType;
 import com.petqa.domain.enums.Gender;
+import com.petqa.domain.enums.PetType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -21,15 +21,12 @@ import java.time.LocalDate;
 public class Pet extends MutableBaseEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pet_id")
     private Long id;
 
     @Column(nullable = false, length = 50)
     private String name;
-
-    @Column(nullable = false, length = 50)
-    private String species;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -45,7 +42,7 @@ public class Pet extends MutableBaseEntity {
     @Column(nullable = false)
     private Gender gender;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
 }
