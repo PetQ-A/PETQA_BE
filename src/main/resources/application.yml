@@ -1,6 +1,30 @@
 spring:
   jwt:
-    secret: sldfkjsldkfjskdfjsldkfjslkdfjsldkfjslkjfsklfjdkljflskdksjdglasidgasdgiwoeiwoi
+    secret: skdfjlskdfjlsdkfjsdlkfjsldfkjslkdfjsldfkjslkdfjwoeifjwoeifjoasidvjsoacivmaoisxcvmoismdv
+    accessTokenExpiration: 3600000
+    refreshTokenExpiration: 86400000
+
+    #  datasource:
+    #    driver-class-name: org.h2.Driver
+    #    url: jdbc:h2:tcp://localhost/~/petqna
+    #    username: sa
+    #    password:
+    #
+    #  h2:
+    #    console:
+    #      enabled: true
+    #      path: /h2-console
+    #
+    #  jpa:
+    #    database-platform: org.hibernate.dialect.H2Dialect
+    #    hibernate:
+    #      ddl-auto: create
+    #    show-sql: true
+    #    properties:
+    #      hibernate:
+    #        format_sql: true
+    #        default_batch_fetch_size: 1000
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://db-petqa.chu202akwjzf.ap-northeast-2.rds.amazonaws.com:3306/petqa?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
@@ -18,7 +42,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
@@ -37,4 +61,18 @@ spring:
 logging:
   level:
     org.hibernate.SQL: debug
+
+cloud:
+  aws:
+    stack:
+      auto: false
+    credentials:
+      accessKey: AKIAW3MEDPMGX34VGBHD
+      secretKey: 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
+    s3:
+      bucket: pet-qna
+    region:
+      static: ap-northeast-2
+
+
 

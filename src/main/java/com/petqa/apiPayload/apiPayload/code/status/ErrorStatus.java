@@ -30,8 +30,13 @@ public enum ErrorStatus implements BaseErrorCode {
     USER_NOT_NAME(HttpStatus.BAD_REQUEST, "USER4010", "이름이 없습니다."),
     USER_NOT_PHONE(HttpStatus.BAD_REQUEST, "USER4011", "전화번호가 없습니다."),
 
-    // Refresh Token 관련 에러
+    // Token 관련 에러
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "REFRESH4001", "리프레시 토큰이 없습니다."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "REFRESH4002", "리프레시 토큰이 만료되었습니다."),
+    ACCESS_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "ACCESS4001", "액세스 토큰이 만료되었습니다."),
+    INVALID_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN4001", "유효하지 않은 토큰입니다."),
+
+    FILE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "FILE4001", "파일 업로드에 실패했습니다."),
 
     // 커뮤니티 관련 에러
     POST_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3001", "존재하지 않는 게시글 입니다."),
