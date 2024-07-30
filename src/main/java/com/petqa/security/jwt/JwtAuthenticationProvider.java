@@ -1,15 +1,15 @@
 package com.petqa.security.jwt;
 
 import com.petqa.apiPayload.apiPayload.code.status.ErrorStatus;
+import com.petqa.apiPayload.apiPayload.exception.handler.TokenHandler;
 import com.petqa.apiPayload.apiPayload.exception.handler.UserHandler;
 import com.petqa.domain.User;
 import com.petqa.dto.user.CustomUserDetails;
+import com.petqa.repository.RefreshRepository;
 import com.petqa.repository.UserRepository;
-import com.petqa.service.refresh.RefreshCommandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -23,7 +23,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
-    private final RefreshCommandService refreshCommandService;
+    private final RefreshRepository refreshRepository;
 
 
     @Override
@@ -36,7 +36,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
         try {
             if (jwtUtil.isExpired(accessToken)) {
-                throw new UserHandler(ErrorStatus.ACCESS_TOKEN_EXPIRED);
+                throw new TokenHandler(ErrorStatus.ACCESS_TOKEN_EXPIRED);
             }
 
             String socialId = jwtUtil.getSocialId(accessToken);
@@ -48,17 +48,14 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
             CustomUserDetails userDetails = new CustomUserDetails(user);
 
             // Refresh 토큰 처리
+            System.out.println("refreshToken = " + refreshToken);
             if (jwtUtil.isExpired(refreshToken)) {
                 throw new UserHandler(ErrorStatus.REFRESH_TOKEN_EXPIRED);
             }
 
-            try {
-                // 기존 코드
-                refreshCommandService.addRefresh(username, socialId, refreshToken, jwtUtil.getRefreshTokenExpiration());
-            } catch (Exception e) {
-                log.error("Failed to save refresh token", e);
-                throw new AuthenticationServiceException("Authentication failed: " + e.getMessage(), e);
-            }
+            // 기존 코드
+            refreshRepository.findByRefresh(refreshToken)
+                    .orElseThrow(() -> new TokenHandler(ErrorStatus.REFRESH_TOKEN_NOT_FOUND));
 
             return new JwtAuthenticationToken(userDetails, accessToken, refreshToken, userDetails.getAuthorities());
         } catch (Exception e) {

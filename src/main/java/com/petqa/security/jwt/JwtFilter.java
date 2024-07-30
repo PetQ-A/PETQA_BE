@@ -5,6 +5,7 @@ import com.petqa.apiPayload.apiPayload.exception.handler.TokenHandler;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,7 +39,17 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String accessToken = request.getHeader("access");
-        String refreshToken = request.getHeader("refresh");
+        String refreshToken = null;
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refresh".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
 
         if (accessToken == null) {
             filterChain.doFilter(request, response);
@@ -55,8 +66,6 @@ public class JwtFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (ExpiredJwtException e) {
             throw new TokenHandler(ErrorStatus.ACCESS_TOKEN_EXPIRED);
-        } catch (Exception e) {
-            throw new TokenHandler(ErrorStatus.INVALID_TOKEN);
         }
 
         filterChain.doFilter(request, response);
