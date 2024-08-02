@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -30,15 +31,24 @@ public class MainPageConverter {
             throw new IllegalArgumentException("Pet not found");
         }
 
-        UserQuestion userQuestion = userQuestionRepository.findTopByUserIdOrderByCreatedAtDesc(userId)
-                .orElseThrow(() -> new IllegalArgumentException("UserQuestion not found"));
+        Optional<UserQuestion> optionalUserQuestion = userQuestionRepository.findTopByUserIdOrderByCreatedAtDesc(userId);
+        //일단 유저-질문 테이블에서 해당 유저의 가장 최근 값을 가져오고
 
-        Question todayQuestion = questionRepository.findById(Long.valueOf(userQuestion.getUser().getQuestionCount()))
-                .orElseThrow(() -> new IllegalArgumentException("Question not found"));
-        LocalDate today = LocalDate.now();
+        Question todayQuestion;
+        boolean questionStatus = false;
 
-        boolean questionStatus = user.getUserQuestionsList().stream()
-                .anyMatch(mq -> mq.getCreatedAt().toLocalDate().equals(today));
+        if (optionalUserQuestion.isPresent()) {
+            UserQuestion userQuestion = optionalUserQuestion.get();
+            todayQuestion = questionRepository.findById((userQuestion.getQuestion().getId()))
+                    .orElse(null);
+
+            LocalDate today = LocalDate.now();
+            questionStatus = user.getUserQuestionsList().stream()
+                    .anyMatch(uq -> uq.getCreatedAt().toLocalDate().equals(today));
+        }else {
+            todayQuestion = questionRepository.findById(Long.valueOf(1))
+                    .orElseThrow(()->new IllegalArgumentException("Default question not found"));
+        }
 
         return MainPageDTO.MainPageResponseDTO.builder()
                 .petName(pet.getName())
