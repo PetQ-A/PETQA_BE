@@ -70,6 +70,7 @@ public class CommunityCommandService {
                 .category(Category.fromName(postCreateRequestDTO.getCategory()))
                 .region(Region.fromName(postCreateRequestDTO.getRegion()))
                 .content(postCreateRequestDTO.getContent())
+                .view(0L)
                 .user(user)
                 .build();
 
@@ -78,6 +79,11 @@ public class CommunityCommandService {
         // 게시글 사진
         log.info("게시글 사진 생성");
         for (MultipartFile file : files) {
+
+            if(file.isEmpty()) {
+                break;
+            }
+
             String url;
 
             try {
