@@ -6,6 +6,9 @@ import com.petqa.domain.enums.Region;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Entity
 @Builder
@@ -35,6 +38,12 @@ public class Post extends MutableBaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "post")
+    private List<PostImage> imageList = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "post")
+    private Vote vote;
 
     public void upView() {
         this.view++;
