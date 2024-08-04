@@ -26,11 +26,11 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Optional<Comment> findByIdAndPostAndParentIsNull(Long commentId, Post post);
 
 
-    @Query("SELECT c, ct FROM Comment c JOIN CommentTag ct ON ct.comment = c WHERE "
+    @Query("SELECT c FROM Comment c JOIN FETCH c.tag WHERE "
             + "(c.parent = :comment) AND "
-            + "(:lastReply IS NULL OR c.id > :lastReply)"
+            + "(:lastReply IS NULL)"
             + "ORDER BY c.id ASC")
-    List<Object[]> findRepliesLatest(@Param("comment") Comment comment,
+    List<Comment> findRepliesLatest(@Param("comment") Comment comment,
                                      @Param("lastReply") Long lastReply,
                                      Pageable pageable);
 }

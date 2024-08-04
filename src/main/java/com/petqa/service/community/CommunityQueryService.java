@@ -23,11 +23,11 @@ import java.util.List;
 @Slf4j
 public class CommunityQueryService {
 
-    final private PostRepository postRepository;
-    final private PostImageRepository postImageRepository;
-    final private CommentRepository commentRepository;
-    final private VoteRepository voteRepository;
-    final private VoteItemRepository voteItemRepository;
+    private final PostRepository postRepository;
+    private final PostImageRepository postImageRepository;
+    private final CommentRepository commentRepository;
+    private final VoteRepository voteRepository;
+    private final VoteItemRepository voteItemRepository;
 
     /*
      * 게시글 리스트 조회
@@ -68,7 +68,7 @@ public class CommunityQueryService {
                         .pet(CommunityResponseDTO.PostListResponseDTO.Pet.builder()
                                 .name(post.getUser().getPet().getName())
                                 .weight(post.getUser().getPet().getWeight())
-                                .species(post.getUser().getPet().getSpecies())
+//                                .species(post.getUser().getPet().getSpecies())
                                 .build())
                         .build())
                 .toList();
@@ -96,7 +96,7 @@ public class CommunityQueryService {
                 .comment(commentRepository.countByPost(post))
                 .pet(CommunityResponseDTO.PostResponseDTO.Pet.builder()
                         .name(post.getUser().getPet().getName())
-                        .species(post.getUser().getPet().getSpecies())
+//                        .species(post.getUser().getPet().getSpecies())
                         .weight(post.getUser().getPet().getWeight())
                         .build())
                 .user(CommunityResponseDTO.PostResponseDTO.User.builder()
@@ -158,29 +158,24 @@ public class CommunityQueryService {
 
         PageRequest pageRequest = PageRequest.of(0, size != null ? size : 10);
 
+        log.info("댓글 : {}", comment.getId());
         log.info("답글 목록 : {}", commentRepository.findRepliesLatest(comment, lastReply, pageRequest));
 
 
         return commentRepository.findRepliesLatest(comment, lastReply, pageRequest).stream()
-                .map(objects -> {
-
-                    Comment reply = (Comment) objects[0];
-                    CommentTag commentTag = (CommentTag) objects[1];
-
-                    return CommunityResponseDTO.ReplyResponseDTO.builder()
-                            .replyId(reply.getId())
-                            .user(CommunityResponseDTO.ReplyResponseDTO.User.builder()
-                                    .userId(reply.getUser().getId())
-                                    .nickname(reply.getUser().getUsername())
-                                    .build())
-                            .tag(CommunityResponseDTO.ReplyResponseDTO.Tag.builder()
-                                    .nickname(commentTag.getUser().getUsername())
-                                    .userId(commentTag.getUser().getId())
-                                    .build())
-                            .content(reply.getContent())
-                            .relativeTime(getRelativeTime(reply.getCreatedAt()))
-                            .build();
-                })
+                .map(reply -> CommunityResponseDTO.ReplyResponseDTO.builder()
+                        .replyId(reply.getId())
+                        .user(CommunityResponseDTO.ReplyResponseDTO.User.builder()
+                                .userId(reply.getUser().getId())
+                                .nickname(reply.getUser().getUsername())
+                                .build())
+                        .tag(CommunityResponseDTO.ReplyResponseDTO.Tag.builder()
+                                .nickname(reply.getTag().getUser().getUsername())
+                                .userId(reply.getTag().getUser().getId())
+                                .build())
+                        .content(reply.getContent())
+                        .relativeTime(getRelativeTime(reply.getCreatedAt()))
+                        .build())
                 .toList();
     }
 

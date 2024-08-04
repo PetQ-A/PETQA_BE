@@ -34,4 +34,7 @@ public class Comment extends MutableBaseEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "parent")
     private List<Comment> children = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "comment")
+    private CommentTag tag;
 }

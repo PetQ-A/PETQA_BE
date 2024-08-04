@@ -4,6 +4,7 @@ import com.petqa.apiPayload.apiPayload.ApiResponse;
 import com.petqa.dto.community.CommunityResponseDTO;
 import com.petqa.service.community.CommunityCommandService;
 import com.petqa.service.community.CommunityQueryService;
+import com.petqa.service.s3Bucket.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +16,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommunityAPIController {
 
-    final private CommunityQueryService communityQueryService;
-    final private CommunityCommandService communityCommandService;
+    private final CommunityQueryService communityQueryService;
+    private final CommunityCommandService communityCommandService;
+    private final S3Service s3Service;
+
 
     @GetMapping("/")
     public ResponseEntity<ApiResponse<List<CommunityResponseDTO.PostListResponseDTO>>> postList(@RequestParam(defaultValue = "전체") String category,

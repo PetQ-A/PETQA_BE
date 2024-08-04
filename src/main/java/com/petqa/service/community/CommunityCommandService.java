@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class CommunityCommandService {
 
-    final private PostRepository postRepository;
+    private final PostRepository postRepository;
 
     /*
      * 조회수 증가
