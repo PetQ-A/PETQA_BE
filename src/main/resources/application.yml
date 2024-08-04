@@ -61,6 +61,7 @@ spring:
 logging:
   level:
     org.hibernate.SQL: debug
+    org.apache.coyote.http11L: trace
 
 cloud:
   aws:
