@@ -22,4 +22,10 @@ public class CommunityRequestDTO {
             private Integer end;
         }
     }
+
+
+    @Getter
+    public static class CommentCreateRequestDTO {
+        private String content;
+    }
 }

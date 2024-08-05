@@ -1,6 +1,7 @@
 package com.petqa.service.community;
 
 import com.petqa.apiPayload.apiPayload.code.status.ErrorStatus;
+import com.petqa.apiPayload.apiPayload.exception.handler.CommunityHandler;
 import com.petqa.apiPayload.apiPayload.exception.handler.FileUploadHandler;
 import com.petqa.apiPayload.apiPayload.exception.handler.UserHandler;
 import com.petqa.domain.*;
@@ -8,10 +9,7 @@ import com.petqa.domain.enums.Category;
 import com.petqa.domain.enums.Region;
 import com.petqa.dto.community.CommunityRequestDTO;
 import com.petqa.repository.UserRepository;
-import com.petqa.repository.community.PostImageRepository;
-import com.petqa.repository.community.PostRepository;
-import com.petqa.repository.community.VoteItemRepository;
-import com.petqa.repository.community.VoteRepository;
+import com.petqa.repository.community.*;
 import com.petqa.security.jwt.JwtUtil;
 import com.petqa.service.s3Bucket.S3Service;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +33,7 @@ public class CommunityCommandService {
     private final PostImageRepository postImageRepository;
     private final VoteRepository voteRepository;
     private final VoteItemRepository voteItemRepository;
+    private final CommentRepository commentRepository;
 
     private final JwtUtil jwtUtil;
 
@@ -53,12 +52,12 @@ public class CommunityCommandService {
      */
     public void createPost(List<MultipartFile> files,
                            CommunityRequestDTO.PostCreateRequestDTO postCreateRequestDTO,
-                           String refreshToken) {
+                           String accessToken) {
 
         log.info("게시글 생성");
 
-        String socialId = jwtUtil.getSocialId(refreshToken);
-        String username = jwtUtil.getUsername(refreshToken);
+        String socialId = jwtUtil.getSocialId(accessToken);
+        String username = jwtUtil.getUsername(accessToken);
 
         User user = userRepository.findUserBySocialIdAndUsername(socialId, username)
                 .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
@@ -117,5 +116,27 @@ public class CommunityCommandService {
                     .build());
         }
 
+    }
+
+    public void createComment(CommunityRequestDTO.CommentCreateRequestDTO commentCreateRequestDTO,
+                              Long postId,
+                              String accessToken) {
+
+        log.info("댓글 생성");
+
+        String socialId = jwtUtil.getSocialId(accessToken);
+        String username = jwtUtil.getUsername(accessToken);
+
+        User user = userRepository.findUserBySocialIdAndUsername(socialId, username)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));
+
+        commentRepository.save(Comment.builder()
+                        .content(commentCreateRequestDTO.getContent())
+                        .user(user)
+                        .post(post)
+                        .build());
     }
 }

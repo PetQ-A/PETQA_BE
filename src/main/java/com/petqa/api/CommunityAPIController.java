@@ -6,7 +6,6 @@ import com.petqa.dto.community.CommunityResponseDTO;
 import com.petqa.service.community.CommunityCommandService;
 import com.petqa.service.community.CommunityQueryService;
 import com.petqa.service.s3Bucket.S3Service;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,25 +63,27 @@ public class CommunityAPIController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<ApiResponse> createPost(@RequestPart(name = "files", required = false) List<MultipartFile> files,
+    public ResponseEntity<ApiResponse<String>> createPost(@RequestPart(name = "files", required = false) List<MultipartFile> files,
                                                   @RequestPart(name = "dto") CommunityRequestDTO.PostCreateRequestDTO postCreateRequestDTO,
                                                   HttpServletRequest httpServletRequest) {
 
-        log.info("컨트롤러 시작");
         String access = httpServletRequest.getHeader("access");
-        String refresh = null;
 
-        Cookie[] cookies = httpServletRequest.getCookies();
-
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("refresh")) {
-                refresh = cookie.getValue();
-            }
-        }
-
-        log.info("서비스");
         communityCommandService.createPost(files, postCreateRequestDTO, access);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("게시글 생성"));
+    }
+
+
+    @PostMapping("/{postId}/comments")
+    public ResponseEntity<ApiResponse<String>> createComment(@PathVariable Long postId,
+                                                     @RequestBody CommunityRequestDTO.CommentCreateRequestDTO commentCreateRequestDTO,
+                                                     HttpServletRequest httpServletRequest) {
+
+        String access = httpServletRequest.getHeader("access");
+
+        communityCommandService.createComment(commentCreateRequestDTO, postId, access);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess("댓글 생성"));
     }
 }
