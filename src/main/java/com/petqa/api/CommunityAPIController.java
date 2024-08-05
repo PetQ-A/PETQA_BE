@@ -64,8 +64,8 @@ public class CommunityAPIController {
 
     @PostMapping("/")
     public ResponseEntity<ApiResponse<String>> createPost(@RequestPart(name = "files", required = false) List<MultipartFile> files,
-                                                  @RequestPart(name = "dto") CommunityRequestDTO.PostCreateRequestDTO postCreateRequestDTO,
-                                                  HttpServletRequest httpServletRequest) {
+                                                          @RequestPart(name = "dto") CommunityRequestDTO.PostCreateRequestDTO postCreateRequestDTO,
+                                                          HttpServletRequest httpServletRequest) {
 
         String access = httpServletRequest.getHeader("access");
 
@@ -77,8 +77,8 @@ public class CommunityAPIController {
 
     @PostMapping("/{postId}/comments")
     public ResponseEntity<ApiResponse<String>> createComment(@PathVariable Long postId,
-                                                     @RequestBody CommunityRequestDTO.CommentCreateRequestDTO commentCreateRequestDTO,
-                                                     HttpServletRequest httpServletRequest) {
+                                                             @RequestBody CommunityRequestDTO.CommentCreateRequestDTO commentCreateRequestDTO,
+                                                             HttpServletRequest httpServletRequest) {
 
         String access = httpServletRequest.getHeader("access");
 
@@ -87,11 +87,23 @@ public class CommunityAPIController {
         return ResponseEntity.ok(ApiResponse.onSuccess("댓글 생성"));
     }
 
+    @PostMapping("/{postId}/vote")
+    public ResponseEntity<ApiResponse<String>> vote(@PathVariable Long postId,
+                                                    @RequestBody CommunityRequestDTO.VoteRequestDTO voteRequestDTO,
+                                                    HttpServletRequest httpServletRequest) {
+
+        String access = httpServletRequest.getHeader("access");
+
+        communityCommandService.vote(voteRequestDTO, postId, access);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess("투표 완료"));
+    }
+
     @PostMapping("/{postId}/comments/{commentId}/replies")
     public ResponseEntity<ApiResponse<String>> createReply(@PathVariable Long postId,
-                                                             @PathVariable Long commentId,
-                                                             @RequestBody CommunityRequestDTO.ReplyCreateRequestDTO replyCreateRequestDTO,
-                                                             HttpServletRequest httpServletRequest) {
+                                                           @PathVariable Long commentId,
+                                                           @RequestBody CommunityRequestDTO.ReplyCreateRequestDTO replyCreateRequestDTO,
+                                                           HttpServletRequest httpServletRequest) {
 
         String access = httpServletRequest.getHeader("access");
 

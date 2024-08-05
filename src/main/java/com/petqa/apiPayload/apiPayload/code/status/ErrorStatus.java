@@ -41,7 +41,11 @@ public enum ErrorStatus implements BaseErrorCode {
     // 커뮤니티 관련 에러
     POST_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3001", "존재하지 않는 게시글 입니다."),
     COMMENT_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3001", "존재하지 않는 댓글 입니다."),
-
+    VOTE_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3002", "존재하지 않는 투표입니다."),
+    VOTE_NOT_MULTI(HttpStatus.BAD_REQUEST, "COMMUNITY3003", "복수 선택이 불가능한 투표입니다."),
+    VOTE_AFTER_END(HttpStatus.BAD_REQUEST, "COMMUNITY3004", "투표기간이 끝났습니다."),
+    VOTE_COUNT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3005", "이미 투표했습니다."),
+    VOTE_ITEM_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3006", "존재하지 않는 투표 선택지입니다.")
     ;
 
     private final HttpStatus httpStatus;

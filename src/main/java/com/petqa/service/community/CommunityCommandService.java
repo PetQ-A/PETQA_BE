@@ -35,6 +35,7 @@ public class CommunityCommandService {
     private final VoteItemRepository voteItemRepository;
     private final CommentRepository commentRepository;
     private final CommentTagRepository commentTagRepository;
+    private final VoteCountRepository voteCountRepository;
 
     private final JwtUtil jwtUtil;
 
@@ -124,7 +125,6 @@ public class CommunityCommandService {
                               String accessToken) {
 
 
-
         String socialId = jwtUtil.getSocialId(accessToken);
         String username = jwtUtil.getUsername(accessToken);
 
@@ -178,5 +178,61 @@ public class CommunityCommandService {
                 .comment(reply)
                 .user(tagUser)
                 .build());
+    }
+
+    public void vote(CommunityRequestDTO.VoteRequestDTO voteRequestDTO,
+                           Long postId,
+                           String accessToken) {
+
+        String socialId = jwtUtil.getSocialId(accessToken);
+        String username = jwtUtil.getUsername(accessToken);
+
+        User user = userRepository.findUserBySocialIdAndUsername(socialId, username)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));
+
+        Vote vote = voteRepository.findByPost(post)
+                .orElseThrow(() -> new CommunityHandler(ErrorStatus.VOTE_NOT_EXIST));
+
+        // 복수선택 체크
+        // 복수 선택인데 multi가 false이면 예외처리
+        if (voteRequestDTO.getItem().size() > 1 && !vote.getMulti()) {
+            throw new CommunityHandler(ErrorStatus.VOTE_NOT_MULTI);
+        }
+
+
+        // end 기간 확인
+        // 투표한 datetime이 end보다 이후이면 예외처리
+        if (LocalDateTime.now().isAfter(vote.getEnd())) {
+            throw new CommunityHandler(ErrorStatus.VOTE_AFTER_END);
+        }
+
+        // 투표했는지 안했는지 확인
+        if (voteCountRepository.existsByUser(user)) {
+            throw new CommunityHandler(ErrorStatus.VOTE_COUNT_ALREADY_EXIST);
+        }
+
+
+        // VoteCount 생성
+        // VoteItem number 증가
+        voteRequestDTO.getItem()
+                .forEach(item -> {
+
+                    VoteItem voteItem = voteItemRepository.findById(item.getVoteItemId())
+                            .orElseThrow(() -> new CommunityHandler(ErrorStatus.VOTE_ITEM_NOT_EXIST));
+
+                    if(!voteItem.getVote().equals(vote)) {
+                        throw new CommunityHandler(ErrorStatus.VOTE_ITEM_NOT_EXIST);
+                    }
+
+                    voteItemRepository.incrementNumberCount(voteItem.getId());
+
+                    voteCountRepository.save(VoteCount.builder()
+                            .voteItem(voteItem)
+                            .user(user)
+                            .build());
+                });
     }
 }

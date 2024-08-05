@@ -40,4 +40,17 @@ public class CommunityRequestDTO {
             private Long userId;
         }
     }
+
+
+    @Getter
+    public static class VoteRequestDTO {
+
+        private List<Item> item;
+
+        @Getter
+        public static class Item {
+            private Long voteItemId;
+        }
+    }
+
 }
