@@ -28,4 +28,16 @@ public class CommunityRequestDTO {
     public static class CommentCreateRequestDTO {
         private String content;
     }
+
+    @Getter
+    public static class ReplyCreateRequestDTO {
+        private String content;
+        private Tag tag;
+
+        @Getter
+        public static class Tag {
+            private String nickname;
+            private Long userId;
+        }
+    }
 }

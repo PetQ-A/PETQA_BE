@@ -34,6 +34,7 @@ public class CommunityCommandService {
     private final VoteRepository voteRepository;
     private final VoteItemRepository voteItemRepository;
     private final CommentRepository commentRepository;
+    private final CommentTagRepository commentTagRepository;
 
     private final JwtUtil jwtUtil;
 
@@ -79,7 +80,7 @@ public class CommunityCommandService {
         log.info("게시글 사진 생성");
         for (MultipartFile file : files) {
 
-            if(file.isEmpty()) {
+            if (file.isEmpty()) {
                 break;
             }
 
@@ -122,7 +123,7 @@ public class CommunityCommandService {
                               Long postId,
                               String accessToken) {
 
-        log.info("댓글 생성");
+
 
         String socialId = jwtUtil.getSocialId(accessToken);
         String username = jwtUtil.getUsername(accessToken);
@@ -133,10 +134,49 @@ public class CommunityCommandService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));
 
+        log.info("댓글 생성");
         commentRepository.save(Comment.builder()
-                        .content(commentCreateRequestDTO.getContent())
-                        .user(user)
-                        .post(post)
-                        .build());
+                .content(commentCreateRequestDTO.getContent())
+                .user(user)
+                .post(post)
+                .build());
+    }
+
+    public void createReply(CommunityRequestDTO.ReplyCreateRequestDTO replyCreateRequestDTO,
+                            Long postId,
+                            Long commentId,
+                            String accessToken) {
+
+
+        String socialId = jwtUtil.getSocialId(accessToken);
+        String username = jwtUtil.getUsername(accessToken);
+
+        User user = userRepository.findUserBySocialIdAndUsername(socialId, username)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));
+
+        User tagUser = userRepository.findById(replyCreateRequestDTO.getTag().getUserId())
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+
+        Comment parentComment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommunityHandler(ErrorStatus.COMMENT_NOT_EXIST));
+
+        log.info("답글 생성");
+        // 답글 생성
+        Comment reply = commentRepository.save(Comment.builder()
+                .content(replyCreateRequestDTO.getContent())
+                .parent(parentComment)
+                .post(post)
+                .user(user)
+                .build());
+
+        log.info("답글 태그 생성");
+        // 답글 태그 생성
+        commentTagRepository.save(CommentTag.builder()
+                .comment(reply)
+                .user(tagUser)
+                .build());
     }
 }

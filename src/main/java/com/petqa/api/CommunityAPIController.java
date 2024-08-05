@@ -86,4 +86,17 @@ public class CommunityAPIController {
 
         return ResponseEntity.ok(ApiResponse.onSuccess("댓글 생성"));
     }
+
+    @PostMapping("/{postId}/comments/{commentId}/replies")
+    public ResponseEntity<ApiResponse<String>> createReply(@PathVariable Long postId,
+                                                             @PathVariable Long commentId,
+                                                             @RequestBody CommunityRequestDTO.ReplyCreateRequestDTO replyCreateRequestDTO,
+                                                             HttpServletRequest httpServletRequest) {
+
+        String access = httpServletRequest.getHeader("access");
+
+        communityCommandService.createReply(replyCreateRequestDTO, postId, commentId, access);
+
+        return ResponseEntity.ok(ApiResponse.onSuccess("답글 생성"));
+    }
 }
