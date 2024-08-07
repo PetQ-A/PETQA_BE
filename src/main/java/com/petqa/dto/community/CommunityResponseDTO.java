@@ -76,6 +76,10 @@ public class CommunityResponseDTO {
         @AllArgsConstructor
         @RequiredArgsConstructor
         public static class Vote {
+            // end로 계산
+            private Boolean activate;
+            // 유저 투표 여부
+            private Boolean isVoted;
             private Boolean multi;
             private List<Item> item;
 
@@ -87,6 +91,7 @@ public class CommunityResponseDTO {
             public static class Item {
                 private Long voteItemId;
                 private String content;
+                private Double percent;
             }
         }
     }

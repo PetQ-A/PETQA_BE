@@ -2,11 +2,14 @@ package com.petqa.service.community;
 
 import com.petqa.apiPayload.apiPayload.code.status.ErrorStatus;
 import com.petqa.apiPayload.apiPayload.exception.handler.CommunityHandler;
+import com.petqa.apiPayload.apiPayload.exception.handler.UserHandler;
 import com.petqa.domain.*;
 import com.petqa.domain.enums.Category;
 import com.petqa.domain.enums.Region;
 import com.petqa.dto.community.CommunityResponseDTO;
+import com.petqa.repository.UserRepository;
 import com.petqa.repository.community.*;
+import com.petqa.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +31,10 @@ public class CommunityQueryService {
     private final CommentRepository commentRepository;
     private final VoteRepository voteRepository;
     private final VoteItemRepository voteItemRepository;
+    private final VoteCountRepository voteCountRepository;
+    private final UserRepository userRepository;
+
+    private final JwtUtil jwtUtil;
 
     /*
      * 게시글 리스트 조회
@@ -78,8 +85,14 @@ public class CommunityQueryService {
     /*
      * 게시글 조회
      */
-    public CommunityResponseDTO.PostResponseDTO getPost(Long postId) {
+    public CommunityResponseDTO.PostResponseDTO getPost(Long postId, String accessToken) {
         log.info("게시글 id: {} 조회", postId);
+
+        String socialId = jwtUtil.getSocialId(accessToken);
+        String username = jwtUtil.getUsername(accessToken);
+
+        User user = userRepository.findUserBySocialIdAndUsername(socialId, username)
+                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));
 
@@ -105,11 +118,16 @@ public class CommunityQueryService {
                         .build())
                 .vote(vote != null ?
                         CommunityResponseDTO.PostResponseDTO.Vote.builder()
+                                .activate(vote.getEnd().isAfter(LocalDateTime.now()))
+                                .isVoted(voteCountRepository.existsByUserAndVote(user, vote))
                                 .multi(vote.getMulti())
                                 .item(voteItemRepository.findByVote(vote).stream()
                                         .map(voteItem -> CommunityResponseDTO.PostResponseDTO.Vote.Item.builder()
                                                 .voteItemId(voteItem.getId())
                                                 .content(voteItem.getContent())
+                                                .percent(voteCountRepository.countByVote(vote) > 0
+                                                        ? (voteCountRepository.countByVoteItem(voteItem) / (double) voteCountRepository.countByVote(vote)) * 100
+                                                        : 0)
                                                 .build())
                                         .toList())
                                 .build()

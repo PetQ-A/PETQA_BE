@@ -100,22 +100,25 @@ public class CommunityCommandService {
         }
 
         // 투표
-        log.info("투표 생성");
-        Vote vote = voteRepository.save(Vote.builder()
-                .title(postCreateRequestDTO.getVote().getTitle())
-                .multi(postCreateRequestDTO.getVote().getMulti())
-                .end(LocalDateTime.now().plusDays(postCreateRequestDTO.getVote().getEnd()))
-                .post(post)
-                .build());
 
-        // 투표 선택지
-        log.info("투표 선택지 생성");
-        for (String item : postCreateRequestDTO.getVote().getItems()) {
-            voteItemRepository.save(VoteItem.builder()
-                    .content(item)
-                    .number(0L)
-                    .vote(vote)
+        if (postCreateRequestDTO.getVote() != null) {
+            log.info("투표 생성");
+            Vote vote = voteRepository.save(Vote.builder()
+                    .title(postCreateRequestDTO.getVote().getTitle())
+                    .multi(postCreateRequestDTO.getVote().getMulti())
+                    .end(LocalDateTime.now().plusDays(postCreateRequestDTO.getVote().getEnd()))
+                    .post(post)
                     .build());
+
+            // 투표 선택지
+            log.info("투표 선택지 생성");
+            for (String item : postCreateRequestDTO.getVote().getItems()) {
+                voteItemRepository.save(VoteItem.builder()
+                        .content(item)
+                        .number(0L)
+                        .vote(vote)
+                        .build());
+            }
         }
 
     }
@@ -210,7 +213,7 @@ public class CommunityCommandService {
         }
 
         // 투표했는지 안했는지 확인
-        if (voteCountRepository.existsByUser(user)) {
+        if (voteCountRepository.existsByUserAndVote(user, vote)) {
             throw new CommunityHandler(ErrorStatus.VOTE_COUNT_ALREADY_EXIST);
         }
 

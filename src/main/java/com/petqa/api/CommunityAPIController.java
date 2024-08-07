@@ -40,9 +40,13 @@ public class CommunityAPIController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<ApiResponse<CommunityResponseDTO.PostResponseDTO>> postRead(@PathVariable Long postId) {
+    public ResponseEntity<ApiResponse<CommunityResponseDTO.PostResponseDTO>> postRead(@PathVariable Long postId,
+                                                                                      HttpServletRequest httpServletRequest) {
+
+        String access = httpServletRequest.getHeader("access");
+
         communityCommandService.upView(postId);
-        return ResponseEntity.ok(ApiResponse.onSuccess(communityQueryService.getPost(postId)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(communityQueryService.getPost(postId, access)));
     }
 
     @GetMapping("/{postId}/comments")
