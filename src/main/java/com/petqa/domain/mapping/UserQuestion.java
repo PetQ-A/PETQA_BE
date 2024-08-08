@@ -1,4 +1,4 @@
-package com.petqa.domain.Mapping;
+package com.petqa.domain.mapping;
 
 import com.petqa.domain.Answer;
 import com.petqa.domain.Question;
@@ -6,6 +6,8 @@ import com.petqa.domain.User;
 import com.petqa.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -28,4 +30,14 @@ public class UserQuestion extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "answer_id")
     private Answer answer;
+
+    private LocalDateTime updatedAt;
+
+    public void updateAnswer(Answer answer) {
+        this.answer = answer;
+    }
+
+    public void updateTimestamp() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

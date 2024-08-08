@@ -43,5 +43,7 @@ public class User extends MutableBaseEntity {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Pet pet;
 
-
+    public void incrementQuestionCount() {
+        this.questionCount++;
+    }
 }
