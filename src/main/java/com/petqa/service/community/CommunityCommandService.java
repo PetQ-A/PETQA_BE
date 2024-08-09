@@ -4,6 +4,7 @@ import com.petqa.apiPayload.apiPayload.code.status.ErrorStatus;
 import com.petqa.apiPayload.apiPayload.exception.handler.CommunityHandler;
 import com.petqa.apiPayload.apiPayload.exception.handler.FileUploadHandler;
 import com.petqa.apiPayload.apiPayload.exception.handler.UserHandler;
+import com.petqa.base.Util;
 import com.petqa.domain.*;
 import com.petqa.domain.enums.Category;
 import com.petqa.domain.enums.Region;
@@ -53,16 +54,11 @@ public class CommunityCommandService {
      * 게시글 작성
      */
     public void createPost(List<MultipartFile> files,
-                           CommunityRequestDTO.PostCreateRequestDTO postCreateRequestDTO,
-                           String accessToken) {
+                           CommunityRequestDTO.PostCreateRequestDTO postCreateRequestDTO) {
 
         log.info("게시글 생성");
 
-        String socialId = jwtUtil.getSocialId(accessToken);
-        String username = jwtUtil.getUsername(accessToken);
-
-        User user = userRepository.findUserBySocialIdAndUsername(socialId, username)
-                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        User user = Util.getCurrentUser();
 
         // 게시글
         log.info("게시글 생성");
@@ -124,15 +120,9 @@ public class CommunityCommandService {
     }
 
     public void createComment(CommunityRequestDTO.CommentCreateRequestDTO commentCreateRequestDTO,
-                              Long postId,
-                              String accessToken) {
+                              Long postId) {
 
-
-        String socialId = jwtUtil.getSocialId(accessToken);
-        String username = jwtUtil.getUsername(accessToken);
-
-        User user = userRepository.findUserBySocialIdAndUsername(socialId, username)
-                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        User user = Util.getCurrentUser();
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));
@@ -147,15 +137,9 @@ public class CommunityCommandService {
 
     public void createReply(CommunityRequestDTO.ReplyCreateRequestDTO replyCreateRequestDTO,
                             Long postId,
-                            Long commentId,
-                            String accessToken) {
+                            Long commentId) {
 
-
-        String socialId = jwtUtil.getSocialId(accessToken);
-        String username = jwtUtil.getUsername(accessToken);
-
-        User user = userRepository.findUserBySocialIdAndUsername(socialId, username)
-                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        User user = Util.getCurrentUser();
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));
@@ -184,14 +168,9 @@ public class CommunityCommandService {
     }
 
     public void vote(CommunityRequestDTO.VoteRequestDTO voteRequestDTO,
-                           Long postId,
-                           String accessToken) {
+                           Long postId) {
 
-        String socialId = jwtUtil.getSocialId(accessToken);
-        String username = jwtUtil.getUsername(accessToken);
-
-        User user = userRepository.findUserBySocialIdAndUsername(socialId, username)
-                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        User user = Util.getCurrentUser();
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));

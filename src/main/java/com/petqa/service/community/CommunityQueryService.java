@@ -2,7 +2,7 @@ package com.petqa.service.community;
 
 import com.petqa.apiPayload.apiPayload.code.status.ErrorStatus;
 import com.petqa.apiPayload.apiPayload.exception.handler.CommunityHandler;
-import com.petqa.apiPayload.apiPayload.exception.handler.UserHandler;
+import com.petqa.base.Util;
 import com.petqa.domain.*;
 import com.petqa.domain.enums.Category;
 import com.petqa.domain.enums.Region;
@@ -85,14 +85,10 @@ public class CommunityQueryService {
     /*
      * 게시글 조회
      */
-    public CommunityResponseDTO.PostResponseDTO getPost(Long postId, String accessToken) {
+    public CommunityResponseDTO.PostResponseDTO getPost(Long postId) {
         log.info("게시글 id: {} 조회", postId);
 
-        String socialId = jwtUtil.getSocialId(accessToken);
-        String username = jwtUtil.getUsername(accessToken);
-
-        User user = userRepository.findUserBySocialIdAndUsername(socialId, username)
-                .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        User user = Util.getCurrentUser();
 
         Post post = postRepository.findById(postId).orElseThrow(() -> new CommunityHandler(ErrorStatus.POST_NOT_EXIST));
 

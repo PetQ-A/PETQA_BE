@@ -5,8 +5,6 @@ import com.petqa.dto.community.CommunityRequestDTO;
 import com.petqa.dto.community.CommunityResponseDTO;
 import com.petqa.service.community.CommunityCommandService;
 import com.petqa.service.community.CommunityQueryService;
-import com.petqa.service.s3Bucket.S3Service;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +21,6 @@ public class CommunityAPIController {
 
     private final CommunityQueryService communityQueryService;
     private final CommunityCommandService communityCommandService;
-    private final S3Service s3Service;
 
 
     @GetMapping("/")
@@ -40,13 +37,10 @@ public class CommunityAPIController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<ApiResponse<CommunityResponseDTO.PostResponseDTO>> postRead(@PathVariable Long postId,
-                                                                                      HttpServletRequest httpServletRequest) {
-
-        String access = httpServletRequest.getHeader("access");
+    public ResponseEntity<ApiResponse<CommunityResponseDTO.PostResponseDTO>> postRead(@PathVariable Long postId) {
 
         communityCommandService.upView(postId);
-        return ResponseEntity.ok(ApiResponse.onSuccess(communityQueryService.getPost(postId, access)));
+        return ResponseEntity.ok(ApiResponse.onSuccess(communityQueryService.getPost(postId)));
     }
 
     @GetMapping("/{postId}/comments")
@@ -68,12 +62,9 @@ public class CommunityAPIController {
 
     @PostMapping("/")
     public ResponseEntity<ApiResponse<String>> createPost(@RequestPart(name = "files", required = false) List<MultipartFile> files,
-                                                          @RequestPart(name = "dto") CommunityRequestDTO.PostCreateRequestDTO postCreateRequestDTO,
-                                                          HttpServletRequest httpServletRequest) {
+                                                          @RequestPart(name = "dto") CommunityRequestDTO.PostCreateRequestDTO postCreateRequestDTO) {
 
-        String access = httpServletRequest.getHeader("access");
-
-        communityCommandService.createPost(files, postCreateRequestDTO, access);
+        communityCommandService.createPost(files, postCreateRequestDTO);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("게시글 생성"));
     }
@@ -81,24 +72,18 @@ public class CommunityAPIController {
 
     @PostMapping("/{postId}/comments")
     public ResponseEntity<ApiResponse<String>> createComment(@PathVariable Long postId,
-                                                             @RequestBody CommunityRequestDTO.CommentCreateRequestDTO commentCreateRequestDTO,
-                                                             HttpServletRequest httpServletRequest) {
+                                                             @RequestBody CommunityRequestDTO.CommentCreateRequestDTO commentCreateRequestDTO) {
 
-        String access = httpServletRequest.getHeader("access");
-
-        communityCommandService.createComment(commentCreateRequestDTO, postId, access);
+        communityCommandService.createComment(commentCreateRequestDTO, postId);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("댓글 생성"));
     }
 
     @PostMapping("/{postId}/vote")
     public ResponseEntity<ApiResponse<String>> vote(@PathVariable Long postId,
-                                                    @RequestBody CommunityRequestDTO.VoteRequestDTO voteRequestDTO,
-                                                    HttpServletRequest httpServletRequest) {
+                                                    @RequestBody CommunityRequestDTO.VoteRequestDTO voteRequestDTO) {
 
-        String access = httpServletRequest.getHeader("access");
-
-        communityCommandService.vote(voteRequestDTO, postId, access);
+        communityCommandService.vote(voteRequestDTO, postId);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("투표 완료"));
     }
@@ -106,12 +91,9 @@ public class CommunityAPIController {
     @PostMapping("/{postId}/comments/{commentId}/replies")
     public ResponseEntity<ApiResponse<String>> createReply(@PathVariable Long postId,
                                                            @PathVariable Long commentId,
-                                                           @RequestBody CommunityRequestDTO.ReplyCreateRequestDTO replyCreateRequestDTO,
-                                                           HttpServletRequest httpServletRequest) {
+                                                           @RequestBody CommunityRequestDTO.ReplyCreateRequestDTO replyCreateRequestDTO) {
 
-        String access = httpServletRequest.getHeader("access");
-
-        communityCommandService.createReply(replyCreateRequestDTO, postId, commentId, access);
+        communityCommandService.createReply(replyCreateRequestDTO, postId, commentId);
 
         return ResponseEntity.ok(ApiResponse.onSuccess("답글 생성"));
     }
