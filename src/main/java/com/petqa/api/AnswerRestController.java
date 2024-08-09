@@ -2,8 +2,8 @@ package com.petqa.api;
 
 import com.petqa.apiPayload.apiPayload.ApiResponse;
 import com.petqa.dto.answer.AnswerDTO;
-import com.petqa.service.service.AnswerService;
-import com.petqa.service.service.AnswerServiceImpl;
+import com.petqa.service.answer.AnswerService;
+import com.petqa.service.answer.AnswerServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

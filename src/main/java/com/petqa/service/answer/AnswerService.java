@@ -1,4 +1,4 @@
-package com.petqa.service.service;
+package com.petqa.service.answer;
 
 import com.petqa.domain.Answer;
 import com.petqa.domain.mapping.UserQuestion;
