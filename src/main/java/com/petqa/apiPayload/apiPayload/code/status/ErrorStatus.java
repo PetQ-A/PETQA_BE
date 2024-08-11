@@ -36,8 +36,17 @@ public enum ErrorStatus implements BaseErrorCode {
     ACCESS_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "ACCESS4001", "액세스 토큰이 만료되었습니다."),
     INVALID_TOKEN(HttpStatus.BAD_REQUEST, "TOKEN4001", "유효하지 않은 토큰입니다."),
 
-    FILE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "FILE4001", "파일 업로드에 실패했습니다.");
+    FILE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "FILE4001", "파일 업로드에 실패했습니다."),
 
+    // 커뮤니티 관련 에러
+    POST_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3001", "존재하지 않는 게시글 입니다."),
+    COMMENT_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3001", "존재하지 않는 댓글 입니다."),
+    VOTE_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3002", "존재하지 않는 투표입니다."),
+    VOTE_NOT_MULTI(HttpStatus.BAD_REQUEST, "COMMUNITY3003", "복수 선택이 불가능한 투표입니다."),
+    VOTE_AFTER_END(HttpStatus.BAD_REQUEST, "COMMUNITY3004", "투표기간이 끝났습니다."),
+    VOTE_COUNT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3005", "이미 투표했습니다."),
+    VOTE_ITEM_NOT_EXIST(HttpStatus.BAD_REQUEST, "COMMUNITY3006", "존재하지 않는 투표 선택지입니다.")
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;
