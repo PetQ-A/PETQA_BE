@@ -4,7 +4,7 @@ import com.petqa.domain.Mapping.UserQuestion;
 import com.petqa.domain.Pet;
 import com.petqa.domain.Question;
 import com.petqa.domain.User;
-import com.petqa.dto.mainpage.MainPageDTO;
+import com.petqa.dto.mapping.MainPageDTO;
 import com.petqa.repository.PetRepository;
 import com.petqa.repository.QuestionRepository;
 import com.petqa.repository.UserQuestionRepository;

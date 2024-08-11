@@ -1,4 +1,4 @@
-package com.petqa.dto.mainpage;
+package com.petqa.dto.mapping;
 
 import lombok.*;
 

@@ -1,7 +1,7 @@
 package com.petqa.service.mainPage;
 
 import com.petqa.converter.MainPageConverter;
-import com.petqa.dto.mainpage.MainPageDTO;
+import com.petqa.dto.mapping.MainPageDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
