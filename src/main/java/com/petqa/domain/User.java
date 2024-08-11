@@ -1,6 +1,5 @@
 package com.petqa.domain;
 
-
 import com.petqa.domain.Mapping.UserQuestion;
 import com.petqa.domain.common.MutableBaseEntity;
 import jakarta.persistence.*;
@@ -34,10 +33,10 @@ public class User extends MutableBaseEntity {
     @Column(nullable = false, length = 50)
     private String username;
 
-
     @Column(nullable = false)
     @ColumnDefault("0")
     @Max(1000)
+    @Setter
     private Integer points;
 
     @Column(nullable = false)

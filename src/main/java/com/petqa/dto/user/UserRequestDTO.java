@@ -2,6 +2,7 @@ package com.petqa.dto.user;
 
 import com.petqa.domain.enums.Gender;
 import com.petqa.domain.enums.PetType;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
