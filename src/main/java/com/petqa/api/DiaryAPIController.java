@@ -4,6 +4,7 @@ import com.petqa.apiPayload.apiPayload.ApiResponse;
 import com.petqa.dto.diary.DiaryRequestDTO;
 import com.petqa.dto.diary.DiaryResponseDTO;
 import com.petqa.service.diary.DiaryService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.engine.spi.Resolution;
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.Date;
@@ -26,7 +28,10 @@ public class DiaryAPIController {
     @PostMapping("/{diaryDate}")
     public ResponseEntity<ApiResponse<DiaryResponseDTO>> writeDiary(Principal principal,
                                                                     @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate diaryDate,
-                                                                    @RequestBody DiaryRequestDTO.AllDto request){
+                                                                    @RequestPart("request") DiaryRequestDTO.AllDto request,
+                                                                    @RequestPart(value = "petProfileImage", required = false) MultipartFile diaryImage) {
+
+        request.setImg(diaryImage);
         String username = principal.getName();
         DiaryResponseDTO written = diaryService.writeMyDiary(username, diaryDate, request);
 
@@ -46,9 +51,9 @@ public class DiaryAPIController {
     @PatchMapping("/picture/{diaryDate}")
     public ResponseEntity<ApiResponse<DiaryResponseDTO>> modifyImage(Principal principal,
                                                                      @PathVariable LocalDate diaryDate,
-                                                                     @RequestBody DiaryRequestDTO.ImageDto request){
+                                                                     @RequestPart(value = "petProfileImage", required = false) MultipartFile diaryImage){
         String username = principal.getName();
-        DiaryResponseDTO modified = diaryService.modifyMyImage(username, diaryDate, request);
+        DiaryResponseDTO modified = diaryService.modifyMyImage(username, diaryDate, diaryImage);
 
         return ResponseEntity.ok(ApiResponse.onSuccess(modified));
     }

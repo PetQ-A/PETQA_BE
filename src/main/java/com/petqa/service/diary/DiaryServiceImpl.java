@@ -9,9 +9,13 @@ import com.petqa.repository.DiaryRepository;
 import com.petqa.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.petqa.service.s3Bucket.S3Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -24,40 +28,32 @@ public class DiaryServiceImpl implements DiaryService{
 
     private final DiaryRepository diaryRepository;
     private final UserRepository userRepository;
+    private final S3Service s3Service;
 
     @Transactional
     @Override
-    public DiaryResponseDTO writeMyDiary(String username, LocalDate diarydate, DiaryRequestDTO.AllDto request) {
+    public DiaryResponseDTO writeMyDiary(String username, LocalDate diaryDate, DiaryRequestDTO.AllDto request) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("유저 없음"));
 
-//        User user = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new RuntimeException("유저 없음"));
-//
-//        // DiaryRequestDTO.AllDto를 Diary 엔티티로 변환
-//        Diary diary = request.toEntity(user);
-//
-//        // Diary 엔티티 저장
-//        Diary savedDiary = diaryRepository.save(diary);
-//
-//        DiaryResponseDTO responseDTO = DiaryConverter.responseDTO(savedDiary);
-//        return responseDTO;
+        // 이미지 업로드 로직
+        String imgUrl = null;
+        if (request.getImg() != null && !request.getImg().isEmpty()) {
+            try {
+                imgUrl = s3Service.uploadFile(request.getImg());
+            } catch (IOException e) {throw new RuntimeException("Failed to upload image", e);}
+        }
 
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("유저 없음"));
 
-            // DiaryRequestDTO.AllDto를 Diary 엔티티로 변환
-            Diary diary = request.toEntity(user, diarydate);
+        // DiaryRequestDTO.AllDto를 Diary 엔티티로 변환 (이미지 URL 포함)
+        Diary diary = request.toEntity(user, diaryDate, imgUrl);
 
-            // Diary 엔티티 저장
-            Diary savedDiary = diaryRepository.save(diary);
+        // Diary 엔티티 저장
+        Diary savedDiary = diaryRepository.save(diary);
 
-            // 관련된 User 엔티티를 병합
-            userRepository.save(user);
-
-            DiaryResponseDTO responseDTO = DiaryConverter.responseDTO(savedDiary);
-            return responseDTO;
-
+        DiaryResponseDTO responseDTO = DiaryConverter.responseDTO(savedDiary);
+        return responseDTO;
     }
-
     @Transactional
     @Override
     public DiaryResponseDTO modifyMyMemo(String username, LocalDate diaryDate, DiaryRequestDTO.MemoDto request){
@@ -85,7 +81,7 @@ public class DiaryServiceImpl implements DiaryService{
 
     @Transactional
     @Override
-    public DiaryResponseDTO modifyMyImage(String username, LocalDate diaryDate, DiaryRequestDTO.ImageDto request){
+    public DiaryResponseDTO modifyMyImage(String username, LocalDate diaryDate, MultipartFile diaryImage){
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("유저 없음"));
 
@@ -94,7 +90,17 @@ public class DiaryServiceImpl implements DiaryService{
 
         if (!diary.getUser().equals(user)) { throw new RuntimeException("수정 권한 없음"); }
 
-        diary.setMemo(request.getImg());
+        String imgUrl = null;
+        if (diaryImage != null && !diaryImage.isEmpty()) {
+            try {
+                imgUrl = s3Service.uploadFile(diaryImage);
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 업로드 실패", e);
+            }
+        }
+
+        diary.setImg(imgUrl);
+
         Diary updatedDiary = diaryRepository.save(diary);
 
         DiaryResponseDTO responseDTO = DiaryConverter.responseDTO(updatedDiary);

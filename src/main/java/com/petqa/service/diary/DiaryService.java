@@ -2,6 +2,8 @@ package com.petqa.service.diary;
 
 import com.petqa.dto.diary.DiaryRequestDTO;
 import com.petqa.dto.diary.DiaryResponseDTO;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.time.LocalDate;
 
 import java.util.Date;
@@ -14,7 +16,7 @@ public interface DiaryService {
 
     DiaryResponseDTO modifyMyMemo(String username, LocalDate diaryDate, DiaryRequestDTO.MemoDto request);
 
-    DiaryResponseDTO modifyMyImage(String username, LocalDate diaryDate, DiaryRequestDTO.ImageDto request);
+    DiaryResponseDTO modifyMyImage(String username, LocalDate diaryDate, MultipartFile diaryImage);
 
     DiaryResponseDTO eraseMyImage(String username, LocalDate diaryDate);
 

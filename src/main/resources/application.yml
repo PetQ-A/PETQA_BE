@@ -27,9 +27,10 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    #url: jdbc:mysql://localhost:3306/pet
+    url: jdbc:mysql://localhost:3306/pet
     #url: jdbc:mysql://db-petqa.chu202akwjzf.ap-northeast-2.rds.amazonaws.com:3306/petqa?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
+    password: dbswn0525!sql
     #password: ehdfprl77
     hikari:
       maximum-pool-size: 10
