@@ -1,7 +1,7 @@
 package com.petqa.domain;
 
+import com.petqa.domain.Mapping.UserQuestion;
 import com.petqa.domain.common.BaseEntity;
-import com.petqa.domain.mapping.UserQuestion;
 import jakarta.persistence.*;
 import lombok.*;
 
