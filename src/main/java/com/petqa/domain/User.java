@@ -40,7 +40,7 @@ public class User extends MutableBaseEntity {
     private Integer points;
 
     @Column(nullable = false)
-    @ColumnDefault("0")
+    @ColumnDefault("1")
     private Integer questionCount;
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

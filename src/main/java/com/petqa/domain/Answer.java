@@ -21,4 +21,5 @@ public class Answer extends BaseEntity {
     private String answer;
 
     @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL)
-    private List<UserQuestion> userQuestionsList = new ArrayList<>();}
+    private List<UserQuestion> userQuestionsList = new ArrayList<>();
+}
