@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @Entity
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -46,10 +47,17 @@ public class User extends MutableBaseEntity {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Pet pet;
 
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Diary> diary;
+
+
+
     public void incrementQuestionCount() {
         this.questionCount++;
     }
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<UserQuestion> userQuestionsList = new ArrayList<>();
+
 
 }

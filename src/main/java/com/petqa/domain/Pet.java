@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @Getter
 @Entity
 @Builder
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @DynamicInsert
