@@ -1,6 +1,6 @@
 package com.petqa.converter;
 
-import com.petqa.domain.mapping.UserQuestion;
+import com.petqa.domain.Mapping.UserQuestion;
 import com.petqa.dto.PagedResponseDTO;
 import com.petqa.dto.QuestionDTO;
 import org.springframework.data.domain.Page;

@@ -16,11 +16,11 @@ import java.util.List;
 public class SnackAPIController {
     private final SnackService snackService;
 
-//    @GetMapping("/")
-//    public ApiResponse<List<SnackResponseDTO.SnackListDTO>> getAllSnacks() {
-//        List<SnackResponseDTO.SnackListDTO> allSnacks = snackService.getAllSnacks();
-//        return ApiResponse.onSuccess(allSnacks);
-//    }
+    @GetMapping("/")
+    public ApiResponse<List<SnackResponseDTO.SnackListDTO>> getAllSnacks() {
+        List<SnackResponseDTO.SnackListDTO> allSnacks = snackService.getAllSnacks();
+        return ApiResponse.onSuccess(allSnacks);
+    }
     @PostMapping("/order")
     public ApiResponse<String> Order(@RequestBody SnackOrderDTO.SnackOderRequestDTO request) {
         snackService.OrderSnack(request);

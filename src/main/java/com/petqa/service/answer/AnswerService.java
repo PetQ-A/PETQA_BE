@@ -1,7 +1,7 @@
 package com.petqa.service.answer;
 
 import com.petqa.domain.Answer;
-import com.petqa.domain.mapping.UserQuestion;
+import com.petqa.domain.Mapping.UserQuestion;
 import com.petqa.dto.answer.AnswerDTO;
 import org.springframework.transaction.annotation.Transactional;
 

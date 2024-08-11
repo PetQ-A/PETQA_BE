@@ -2,7 +2,7 @@ package com.petqa.service.userQuestion;
 
 import com.petqa.converter.UserQuestionConverter;
 import com.petqa.domain.Question;
-import com.petqa.domain.mapping.UserQuestion;
+import com.petqa.domain.Mapping.UserQuestion;
 import com.petqa.dto.PagedResponseDTO;
 import com.petqa.dto.QuestionDTO;
 import com.petqa.repository.UserQuestionRepository;

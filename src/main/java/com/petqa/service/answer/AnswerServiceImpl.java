@@ -4,7 +4,7 @@ import com.petqa.converter.AnswerConverter;
 import com.petqa.domain.Answer;
 import com.petqa.domain.Question;
 import com.petqa.domain.User;
-import com.petqa.domain.mapping.UserQuestion;
+import com.petqa.domain.Mapping.UserQuestion;
 import com.petqa.dto.answer.AnswerDTO;
 import com.petqa.repository.AnswerRepository;
 import com.petqa.repository.QuestionRepository;

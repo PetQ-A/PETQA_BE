@@ -3,7 +3,7 @@ package com.petqa.converter;
 import com.petqa.domain.Answer;
 import com.petqa.domain.Question;
 import com.petqa.domain.User;
-import com.petqa.domain.mapping.UserQuestion;
+import com.petqa.domain.Mapping.UserQuestion;
 import com.petqa.dto.answer.AnswerDTO;
 
 public class AnswerConverter {
