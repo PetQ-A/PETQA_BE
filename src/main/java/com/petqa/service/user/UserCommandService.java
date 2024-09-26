@@ -6,11 +6,13 @@ import com.petqa.dto.user.UserRequestDTO;
 
 public interface UserCommandService {
 
-    AuthResponseDTO.LoginResponseDTO login(AuthRequestDTO.SocialLoginDTO socialLoginDTO);
+	AuthResponseDTO.LoginResponseDTO login(AuthRequestDTO.SocialLoginDTO socialLoginDTO);
 
-    AuthResponseDTO.LoginResponseDTO join(UserRequestDTO.CreateUserDTO joinRequest);
+	AuthResponseDTO.LoginResponseDTO join(UserRequestDTO.CreateUserDTO joinRequest);
 
-    AuthResponseDTO.ReissueResponseDTO reissue(String refreshToken);
+	AuthResponseDTO.ReissueResponseDTO reissue(String refreshToken);
 
-    void logout(String refreshToken);
+	void logout(String refreshToken);
+
+	String duplicateCheck(UserRequestDTO.DuplicateCheckDTO duplicateCheckDTO);
 }
