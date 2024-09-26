@@ -3,9 +3,11 @@ package com.petqa.api;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +22,6 @@ import com.petqa.service.user.UserCommandService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -113,9 +114,9 @@ public class AuthAPIController {
 		return ResponseEntity.ok(ApiResponse.onSuccess("로그아웃 성공"));
 	}
 
-	@PostMapping("/duplicate")
-	public ApiResponse<String> checkDuplicate(@RequestBody @Valid UserRequestDTO.DuplicateCheckDTO duplicateCheckDTO) {
-		return ApiResponse.onSuccess(userCommandService.duplicateCheck(duplicateCheckDTO));
+	@GetMapping("/duplicate")
+	public ApiResponse<String> checkDuplicate(@RequestParam String username) {
+		return ApiResponse.onSuccess(userCommandService.duplicateCheck(username));
 	}
 }
 

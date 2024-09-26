@@ -214,8 +214,7 @@ public class UserCommandServiceImpl implements UserCommandService {
 	}
 
 	@Override
-	public String duplicateCheck(UserRequestDTO.DuplicateCheckDTO duplicateCheckDTO) {
-		String username = duplicateCheckDTO.getUsername();
+	public String duplicateCheck(String username) {
 		userRepository.findUserByUsername(username)
 			.ifPresent(u -> {
 				throw new UserHandler(ErrorStatus.USER_ALREADY_EXIST);

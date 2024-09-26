@@ -14,5 +14,5 @@ public interface UserCommandService {
 
 	void logout(String refreshToken);
 
-	String duplicateCheck(UserRequestDTO.DuplicateCheckDTO duplicateCheckDTO);
+	String duplicateCheck(String username);
 }
