@@ -25,6 +25,8 @@ import com.petqa.security.jwt.JwtUtil;
 import com.petqa.service.refresh.RefreshCommandService;
 import com.petqa.service.s3Bucket.S3Service;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -161,28 +163,38 @@ public class UserCommandServiceImpl implements UserCommandService {
 		if (refreshToken == null) {
 			throw new TokenHandler(ErrorStatus.INVALID_TOKEN);
 		}
-
 		try {
-			jwtUtil.isExpired(refreshToken);
-		} catch (Exception e) {
+			// Check if the token is expired
+			if (jwtUtil.isExpired(refreshToken)) {
+				throw new TokenHandler(ErrorStatus.REFRESH_TOKEN_EXPIRED);
+			}
+		} catch (ExpiredJwtException e) {
+			// Token has expired
 			throw new TokenHandler(ErrorStatus.REFRESH_TOKEN_EXPIRED);
+		} catch (JwtException e) {
+			// Token is invalid for other reasons
+			throw new TokenHandler(ErrorStatus.INVALID_TOKEN);
+		} catch (Exception e) {
+			// Handle any other exceptions
+			throw new TokenHandler(ErrorStatus.INVALID_TOKEN);
 		}
 
+		// Extract claims safely
 		String category = jwtUtil.getCategory(refreshToken);
-
-		if (!category.equals("refresh")) {
+		if (!"refresh".equals(category)) {
 			throw new TokenHandler(ErrorStatus.INVALID_TOKEN);
 		}
 
 		String socialId = jwtUtil.getSocialId(refreshToken);
 		String username = jwtUtil.getUsername(refreshToken);
-
+		// 기존 리프레시 토큰 삭제
 		refreshRepository.deleteByRefresh(refreshToken);
-		refreshCommandService.addRefresh(username, socialId, refreshToken, refreshTokenExpiration);
-
-		String newAccessToken = jwtUtil.createJwt("access", socialId, username, accessTokenExpiration);
+		// 새로운 리프레시 토큰 생성
 		String newRefreshToken = jwtUtil.createJwt("refresh", socialId, username, refreshTokenExpiration);
-
+		// 새로운 리프레시 토큰 저장
+		refreshCommandService.addRefresh(username, socialId, newRefreshToken, refreshTokenExpiration);
+		// 새로운 액세스 토큰 생성
+		String newAccessToken = jwtUtil.createJwt("access", socialId, username, accessTokenExpiration);
 		return AuthResponseDTO.ReissueResponseDTO.builder()
 			.accessToken(newAccessToken)
 			.refreshToken(newRefreshToken)
@@ -215,6 +227,10 @@ public class UserCommandServiceImpl implements UserCommandService {
 
 	@Override
 	public String duplicateCheck(String username) {
+		if (username == null || username.isEmpty()) {
+			throw new UserHandler(ErrorStatus.USERNAME_IS_NULL);
+		}
+
 		userRepository.findUserByUsername(username)
 			.ifPresent(u -> {
 				throw new UserHandler(ErrorStatus.USER_ALREADY_EXIST);
