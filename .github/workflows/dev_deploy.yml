@@ -25,15 +25,6 @@ jobs:
         shell: bash # (6).권한 부여
 
       - name: Build with Gradle
-        env:
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_URL: ${{ secrets.DB_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY: ${{ secrets.AWS_S3_ACCESS_KEY }}
-          AWS_SECRET_KEY: ${{ secrets.AWS_S3_SECRET_KEY }}
-        
         run: ./gradlew clean build -x test
         shell: bash # (7).build시작
 
