@@ -51,9 +51,3 @@ cloud:
       bucket: ${AWS_S3_BUCKET}
     region:
       static: ap-northeast-2
-
-
-
-
-
-
